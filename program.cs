@@ -3,17 +3,17 @@ using System.Collections.Generic;
 using System.IO;
 using System.Diagnostics;
 using System.Linq;
-using Excel = Microsoft.Office.Interop.Excel;
 using System.Collections;
 using Bytescout.Spreadsheet;
+using System.Text.RegularExpressions;
 
 namespace ConsoleApp3
 {
     class Program
     {
-        private static string[] ReadAllFilesStartingFromDirectory(string topLevelDirectory, string[] arr )
+        private static string[][] ReadAllFilesInDirectory(string topLevelDirectory, string[][] arr)
         {
-            string[] arrFunc = arr;
+            string[][] arrFunc = arr;
             const string searchPattern = "*.xml";
             const string searchPattern1 = "*.asp";
             var subDirectories = Directory.EnumerateDirectories(topLevelDirectory);
@@ -22,28 +22,33 @@ namespace ConsoleApp3
             var filesInDirectory = filesInDirectory1.Concat(filesInDirectory2).ToArray();
             foreach (var subDirectory in subDirectories)
             {
-                ReadAllFilesStartingFromDirectory(subDirectory, arrFunc);//recursion
-                arrFunc = arrFunc.Concat(IterateFiles(filesInDirectory, topLevelDirectory)).ToArray();
+                arrFunc = arrFunc.Concat(ReadAllFilesInDirectory(subDirectory, arrFunc)).ToArray();//recursion
             }
-               // arrFunc= arrFunc.Concat(IterateFiles(filesInDirectory, topLevelDirectory)).ToArray();
+            arrFunc = arrFunc.Concat(IterateFiles(filesInDirectory, topLevelDirectory)).ToArray();
             return arrFunc;
         }
 
-        private static string[] IterateFiles(IEnumerable<string> files, string directory)
+        private static string[][] IterateFiles(IEnumerable<string> files, string directory)
         {
-            string[] termsList = new string[0];
+            string[][] termsList = new string[0][];
 
             foreach (var file in files)
             {
-               // Console.WriteLine("{0}", Path.Combine(directory, file));//for verification
                 try
                 {
                     string[] lines = File.ReadAllLines(file);
                     foreach (var line in lines)
                     {
-                        termsList = termsList.Concat(new string[] { line }).ToArray();
+                        if(!String.IsNullOrEmpty(line.Trim()))
+                        {
 
-                        //Console.WriteLine(line); 
+                            String output = Regex.Replace(line, @"\>([^\[\]]+)\<", "");
+                            if(output != null)
+                            {
+                                string[] fileExtention = { file, output };
+                                termsList = termsList.Concat(new string[][] { fileExtention }).ToArray();
+                            }
+                        }
                     }
                 }
                 catch (IOException ex)
@@ -57,35 +62,23 @@ namespace ConsoleApp3
         static void Main(string[] args)
         {
             Spreadsheet document = new Spreadsheet();
-
-            // add new worksheet
-            Worksheet Sheet = document.Workbook.Worksheets.Add("FormulaDemo");
-
-            // headers to indicate purpose of the column
-            Sheet.Cell("A1").Value = "Formula (as text)";
-            // set A column width
+            Worksheet Sheet = document.Workbook.Worksheets.Add("sheet1");
+            Sheet.Cell("A1").Value = "Path";
             Sheet.Columns[0].Width = 250;
-
-            Sheet.Cell("B1").Value = "Formula (calculated)";
-            // set B column width
+            Sheet.Cell("B1").Value = "English";
             Sheet.Columns[1].Width = 250;
-
-            string[] termsList = new string[5];
-           string[] tes = ReadAllFilesStartingFromDirectory(@"C:\Users\ADMIN\Desktop\Readfile", termsList);
+            string[][] termsList = new string[0][];
+            string[][] tes = ReadAllFilesInDirectory(@"C:\Users\ADMIN\Desktop\Readfile\test", termsList);
             for (int i = 2; i < tes.Length; i++)
             {
-                Sheet.Cell(Convert.ToString("A" + i)).Value = i;
-                Sheet.Cell(Convert.ToString("A" + i)).Value = tes[i];
+                Sheet.Cell(Convert.ToString("A" + i)).Value = tes[i][0];
+                Sheet.Cell(Convert.ToString("B" + i)).Value = tes[i][1];
             }
             document.SaveAs("Output.xls");
 
-            // Close Spreadsheet
             document.Close();
-
-            // open generated XLS document in default program
             Process.Start("Output.xls");
         }
-
 
     }
 }
