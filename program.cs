@@ -5,79 +5,87 @@ using System.Diagnostics;
 using System.Linq;
 using Excel = Microsoft.Office.Interop.Excel;
 using System.Collections;
+using Bytescout.Spreadsheet;
 
 namespace ConsoleApp3
 {
     class Program
     {
-        public static ArrayList patchExcel = new ArrayList(); ///public variable declaration
-
-        public static int ReadAllFilesStartingFromDirectory(string topLevelDirectory)
+        private static string[] ReadAllFilesStartingFromDirectory(string topLevelDirectory, string[] arr )
         {
+            string[] arrFunc = arr;
             const string searchPattern = "*.xml";
             const string searchPattern1 = "*.asp";
             var subDirectories = Directory.EnumerateDirectories(topLevelDirectory);
-            Console.WriteLine("topLevelDirectory"+ topLevelDirectory);
-            Console.WriteLine("======================================");
             var filesInDirectory1 = Directory.EnumerateFiles(topLevelDirectory, searchPattern);
             var filesInDirectory2 = Directory.EnumerateFiles(topLevelDirectory, searchPattern1);
             var filesInDirectory = filesInDirectory1.Concat(filesInDirectory2).ToArray();
-            //Console.WriteLine(filesInDirectory);
             foreach (var subDirectory in subDirectories)
             {
-                Console.WriteLine("subDirectories"+ subDirectories);
-                Console.WriteLine("subDirectory"+ subDirectory);
-                Console.WriteLine("======================================");
-                ReadAllFilesStartingFromDirectory(subDirectory);//recursion;
+                ReadAllFilesStartingFromDirectory(subDirectory, arrFunc);//recursion
+                arrFunc = arrFunc.Concat(IterateFiles(filesInDirectory, topLevelDirectory)).ToArray();
             }
+               // arrFunc= arrFunc.Concat(IterateFiles(filesInDirectory, topLevelDirectory)).ToArray();
+            return arrFunc;
+        }
 
-            foreach (var file in filesInDirectory)
+        private static string[] IterateFiles(IEnumerable<string> files, string directory)
+        {
+            string[] termsList = new string[0];
+
+            foreach (var file in files)
             {
-               // Console.WriteLine(filesInDirectory.Length);
-                // Console.WriteLine("{0}", Path.Combine(topLevelDirectory, file));
+               // Console.WriteLine("{0}", Path.Combine(directory, file));//for verification
                 try
                 {
-                    Console.WriteLine("file"+ Path.Combine(topLevelDirectory, file));
                     string[] lines = File.ReadAllLines(file);
                     foreach (var line in lines)
                     {
-                        //write line on excel;
+                        termsList = termsList.Concat(new string[] { line }).ToArray();
+
+                        //Console.WriteLine(line); 
                     }
                 }
                 catch (IOException ex)
                 {
-                    System.Threading.Thread.Sleep(100);
-                    //Handle File may be in use...       
                     throw ex;
+                    //Handle File may be in use...                    
                 }
             }
-            return 1;
+            return termsList;
         }
         static void Main(string[] args)
         {
-            var excel = new Excel.Application();
+            Spreadsheet document = new Spreadsheet();
 
-            var workBooks = excel.Workbooks;
-            var workBook = workBooks.Add();
-            var workSheet = (Excel.Worksheet)excel.ActiveSheet;
+            // add new worksheet
+            Worksheet Sheet = document.Workbook.Worksheets.Add("FormulaDemo");
 
-            workSheet.Cells[1, "A"] = "Path";
-            workSheet.Cells[1, "B"] = "English";
-            DateTime foo = DateTime.UtcNow;
-            long unixTime = ((DateTimeOffset)foo).ToUnixTimeSeconds();
+            // headers to indicate purpose of the column
+            Sheet.Cell("A1").Value = "Formula (as text)";
+            // set A column width
+            Sheet.Columns[0].Width = 250;
 
+            Sheet.Cell("B1").Value = "Formula (calculated)";
+            // set B column width
+            Sheet.Columns[1].Width = 250;
 
-            string a = Convert.ToString(unixTime + ".xls");
-            workBook.SaveAs(Directory.GetCurrentDirectory() + "\\" + a, Excel.XlFileFormat.xlOpenXMLWorkbook);
-            workBook.Close();
-            string[] fileArray = Directory.GetFiles(@"C:\Users\Donald-Trump\Desktop\Readfile", "*.asp");
-           // Console.WriteLine(fileArray);
-            foreach (string fileName in fileArray)  
+            string[] termsList = new string[5];
+           string[] tes = ReadAllFilesStartingFromDirectory(@"C:\Users\ADMIN\Desktop\Readfile", termsList);
+            for (int i = 2; i < tes.Length; i++)
             {
-                Console.WriteLine(fileName);
+                Sheet.Cell(Convert.ToString("A" + i)).Value = i;
+                Sheet.Cell(Convert.ToString("A" + i)).Value = tes[i];
             }
-            ReadAllFilesStartingFromDirectory("C:\\Users\\Donald-Trump\\Desktop\\Readfile");
-          //  Console.WriteLine(patchExcel);
+            document.SaveAs("Output.xls");
+
+            // Close Spreadsheet
+            document.Close();
+
+            // open generated XLS document in default program
+            Process.Start("Output.xls");
         }
+
+
     }
 }
