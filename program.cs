@@ -21,6 +21,7 @@ namespace ConsoleApp3
             var filesInDirectory1 = Directory.EnumerateFiles(topLevelDirectory, searchPattern);
             var filesInDirectory2 = Directory.EnumerateFiles(topLevelDirectory, searchPattern1);
             var filesInDirectory = filesInDirectory1.Concat(filesInDirectory2).ToArray();
+
             foreach (var subDirectory in subDirectories)
             {
                 arrFunc = arrFunc.Concat(ReadAllFilesInDirectory(subDirectory, arrFunc)).Distinct().ToArray();//recursion
@@ -33,6 +34,7 @@ namespace ConsoleApp3
         {
             string htmlTagPattern = "<.*?>";
             var regexCss = new Regex("(\\<script(.+?)\\</script\\>)|(\\<style(.+?)\\</style\\>)", RegexOptions.Singleline | RegexOptions.IgnoreCase);
+
             htmlString = regexCss.Replace(htmlString, string.Empty);
             htmlString = Regex.Replace(htmlString, htmlTagPattern, string.Empty);
             htmlString = Regex.Replace(htmlString, @"^\s+$[\r\n]*", "", RegexOptions.Multiline);
@@ -40,6 +42,7 @@ namespace ConsoleApp3
 
             return htmlString;
         }
+
         private static string[][] IterateFiles(IEnumerable<string> files)
         {
             string[][] termsList = new string[0][];
@@ -65,11 +68,13 @@ namespace ConsoleApp3
                                 && !convert.Contains("NOTE: ")
                                 && !convert.Contains("-->")
                                 && !convert.Contains("&#")
-                                && !convert.Contains("javascript:")
+                                && !convert.Contains("javascript")
                                 && !convert.Contains("/*")
                                 && !convert.Contains("*/")
                                 && !convert.Contains(".jpg")
                                 && !convert.Contains("vvSelect(")
+                                && !convert.Contains("script")
+                                && !convert.Contains("http")
                                 )
                             {
                                 string[] fileExtention = { file, convert };
@@ -88,17 +93,20 @@ namespace ConsoleApp3
         }
         static void Main(string[] args)
         {
+            string[] arr = new string[0];
+            string[][] readFile = new string[0][];
             Spreadsheet document = new Spreadsheet();
             Worksheet Sheet = document.Workbook.Worksheets.Add("sheet1");
+
             Sheet.Cell("A1").Value = "Path";
             Sheet.Columns[0].Width = 250;
             Sheet.Cell("B1").Value = "English";
             Sheet.Columns[1].Width = 250;
-            string[] arr = new string[0];
+
             string[] tes = ReadAllFilesInDirectory(@"C:\Users\ADMIN\Desktop\Readfile\test", arr);
-            string[][] readFile = new string[0][];
             readFile = IterateFiles(tes);
             int rowIndex = 2;
+
             for (int i = 0; i < readFile.Length; i++)
             {
 
@@ -106,6 +114,7 @@ namespace ConsoleApp3
                 Sheet.Cell(Convert.ToString("B" + rowIndex)).Value = readFile[i][1];
                 rowIndex++;
             }
+
             document.SaveAs("Output.xls");
             document.Close();
             Process.Start("Output.xls");
