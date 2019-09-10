@@ -52,16 +52,29 @@ namespace ConsoleApp3
                     string[] lines = File.ReadAllLines(file);
                     foreach (var line in lines)
                     {
-                        string convert = GetPlainTextFromHtml(line);
+                        string convert = GetPlainTextFromHtml(line).Trim();
                         //handle check line on string;
-                        if (!String.IsNullOrEmpty(convert.Trim()))
+                        if (!String.IsNullOrEmpty(convert))
                         {
-                            if (!convert.Trim().StartsWith("{") && !convert.Trim().EndsWith("}"))
+                            if (
+                                !convert.StartsWith("{")
+                                && !convert.EndsWith("}")
+                                && (!convert.Contains("=") || !convert.Contains("."))
+                                && !convert.Contains("<%")
+                                && !convert.Contains("%>")
+                                && !convert.Contains("NOTE: ")
+                                && !convert.Contains("-->")
+                                && !convert.Contains("&#")
+                                && !convert.Contains("javascript:")
+                                && !convert.Contains("/*")
+                                && !convert.Contains("*/")
+                                && !convert.Contains(".jpg")
+                                && !convert.Contains("vvSelect(")
+                                )
                             {
                                 string[] fileExtention = { file, convert };
                                 termsList = termsList.Concat(new string[][] { fileExtention }).ToArray();
                             }
-
                         }
                     }
                 }
@@ -85,11 +98,13 @@ namespace ConsoleApp3
             string[] tes = ReadAllFilesInDirectory(@"C:\Users\ADMIN\Desktop\Readfile\test", arr);
             string[][] readFile = new string[0][];
             readFile = IterateFiles(tes);
-            for (int i = 2; i < readFile.Length; i++)
+            int rowIndex = 2;
+            for (int i = 0; i < readFile.Length; i++)
             {
 
-                Sheet.Cell(Convert.ToString("A" + i)).Value = readFile[i][0].Trim();
-                Sheet.Cell(Convert.ToString("B" + i)).Value = readFile[i][1].Trim();
+                Sheet.Cell(Convert.ToString("A" + rowIndex)).Value = readFile[i][0];
+                Sheet.Cell(Convert.ToString("B" + rowIndex)).Value = readFile[i][1];
+                rowIndex++;
             }
             document.SaveAs("Output.xls");
             document.Close();
