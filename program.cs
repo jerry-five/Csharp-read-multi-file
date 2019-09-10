@@ -6,6 +6,8 @@ using System.Linq;
 using System.Collections;
 using System.Text.RegularExpressions;
 using Bytescout.Spreadsheet;
+using System.Text;
+
 namespace ConsoleApp3
 {
     class Program
@@ -27,6 +29,17 @@ namespace ConsoleApp3
             arrFunc = arrFunc.Concat(filesInDirectory).ToArray();
             return arrFunc;
         }
+        private static string GetPlainTextFromHtml(string htmlString)
+        {
+            string htmlTagPattern = "<.*?>";
+            var regexCss = new Regex("(\\<script(.+?)\\</script\\>)|(\\<style(.+?)\\</style\\>)", RegexOptions.Singleline | RegexOptions.IgnoreCase);
+            htmlString = regexCss.Replace(htmlString, string.Empty);
+            htmlString = Regex.Replace(htmlString, htmlTagPattern, string.Empty);
+            htmlString = Regex.Replace(htmlString, @"^\s+$[\r\n]*", "", RegexOptions.Multiline);
+            htmlString = htmlString.Replace("&nbsp;", string.Empty);
+
+            return htmlString;
+        }
         private static string[][] IterateFiles(IEnumerable<string> files)
         {
             string[][] termsList = new string[0][];
@@ -35,19 +48,20 @@ namespace ConsoleApp3
             {
                 try
                 {
+                    StringBuilder sb = new StringBuilder();
                     string[] lines = File.ReadAllLines(file);
                     foreach (var line in lines)
                     {
+                        string convert = GetPlainTextFromHtml(line);
                         //handle check line on string;
-                        if (!String.IsNullOrEmpty(line.Trim()))
+                        if (!String.IsNullOrEmpty(convert.Trim()))
                         {
-
-                            String output = Regex.Replace(line, @"\>([^\[\]]+)\<", "");
-                            if (output != null)
+                            if (!convert.Trim().StartsWith("{") && !convert.Trim().EndsWith("}"))
                             {
-                                string[] fileExtention = { file, output };
+                                string[] fileExtention = { file, convert };
                                 termsList = termsList.Concat(new string[][] { fileExtention }).ToArray();
                             }
+
                         }
                     }
                 }
@@ -68,14 +82,14 @@ namespace ConsoleApp3
             Sheet.Cell("B1").Value = "English";
             Sheet.Columns[1].Width = 250;
             string[] arr = new string[0];
-            string[] tes = ReadAllFilesInDirectory(@"C:\Users\Donald-Trump\Desktop\Readfile", arr);
+            string[] tes = ReadAllFilesInDirectory(@"C:\Users\ADMIN\Desktop\Readfile\test", arr);
             string[][] readFile = new string[0][];
             readFile = IterateFiles(tes);
             for (int i = 2; i < readFile.Length; i++)
             {
 
-                Sheet.Cell(Convert.ToString("A" + i)).Value = readFile[i][0];
-                Sheet.Cell(Convert.ToString("B" + i)).Value = readFile[i][1];
+                Sheet.Cell(Convert.ToString("A" + i)).Value = readFile[i][0].Trim();
+                Sheet.Cell(Convert.ToString("B" + i)).Value = readFile[i][1].Trim();
             }
             document.SaveAs("Output.xls");
             document.Close();
