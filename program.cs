@@ -60,8 +60,7 @@ namespace ConsoleApp3
                         if (!String.IsNullOrEmpty(convert))
                         {
                             if (
-                                   !convert.StartsWith("{")
-                                && !convert.EndsWith("}")
+                                (!convert.StartsWith("{") || !convert.EndsWith("}"))
                                 && (!convert.Contains("=") || !convert.Contains("."))
                                 && !convert.Contains("<%")
                                 && !convert.Contains("%>")
