@@ -43,7 +43,7 @@ namespace ConsoleApp3
             return htmlString;
         }
 
-        private static string[][] IterateFiles(IEnumerable<string> files)
+        private static string[][] IterateFiles(IEnumerable<string> files, int stringLength)
         {
             string[][] termsList = new string[0][];
 
@@ -60,7 +60,7 @@ namespace ConsoleApp3
                         if (!String.IsNullOrEmpty(convert))
                         {
                             if (
-                                !convert.StartsWith("{")
+                                   !convert.StartsWith("{")
                                 && !convert.EndsWith("}")
                                 && (!convert.Contains("=") || !convert.Contains("."))
                                 && !convert.Contains("<%")
@@ -73,11 +73,12 @@ namespace ConsoleApp3
                                 && !convert.Contains("*/")
                                 && !convert.Contains(".jpg")
                                 && !convert.Contains("vvSelect(")
-                                && !convert.Contains("script")
+                                && !convert.Contains("/script")
+                                && !convert.Contains("'script'")
                                 && !convert.Contains("http")
                                 )
                             {
-                                string[] fileExtention = { file, convert };
+                                string[] fileExtention = { file.Remove(0, stringLength + 1), convert };
                                 termsList = termsList.Concat(new string[][] { fileExtention }).ToArray();
                             }
                         }
@@ -95,6 +96,7 @@ namespace ConsoleApp3
         {
             string[] arr = new string[0];
             string[][] readFile = new string[0][];
+            string pathUrl = @"C:\Users\ADMIN\Desktop\Readfile";
             Spreadsheet document = new Spreadsheet();
             Worksheet Sheet = document.Workbook.Worksheets.Add("sheet1");
 
@@ -103,8 +105,9 @@ namespace ConsoleApp3
             Sheet.Cell("B1").Value = "English";
             Sheet.Columns[1].Width = 250;
 
-            string[] tes = ReadAllFilesInDirectory(@"C:\Users\ADMIN\Desktop\Readfile\test", arr);
-            readFile = IterateFiles(tes);
+            string[] tes = ReadAllFilesInDirectory(pathUrl, arr);
+            Console.WriteLine(pathUrl.Length);
+            readFile = IterateFiles(tes, pathUrl.Length);
             int rowIndex = 2;
 
             for (int i = 0; i < readFile.Length; i++)
