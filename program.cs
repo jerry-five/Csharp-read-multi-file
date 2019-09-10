@@ -125,3 +125,5 @@ namespace ConsoleApp3
 
     }
 }
+//refer can be replace function GetPlainTextFromHtml 
+//https://stackoverflow.com/questions/18153998/how-do-i-remove-all-html-tags-from-a-string-without-knowing-which-tags-are-in-it
