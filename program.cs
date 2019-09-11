@@ -52,9 +52,9 @@ namespace ConsoleApp3
                 {
                     StringBuilder sb = new StringBuilder();
                     string[] lines = File.ReadAllLines(file);
-                    foreach (var line in lines)
+                    for(int i = 0; i < lines.Length; i++)
                     {
-                        string convert = GetPlainTextFromHtml(line).Trim();
+                        string convert = GetPlainTextFromHtml(lines[i]).Trim();
                         //handle check line on string;
                         if (!String.IsNullOrEmpty(convert))
                         {
@@ -86,7 +86,7 @@ namespace ConsoleApp3
                                     && !checkAgain.Contains("|")
                                     )
                                 {
-                                    string[] fileExtention = { file.Remove(0, stringLength + 1), checkAgain };
+                                    string[] fileExtention = { file.Remove(0, stringLength + 1), checkAgain,(i + 1).ToString() };
                                     termsList = termsList.Concat(new string[][] { fileExtention }).ToArray();
                                 }
 
@@ -127,14 +127,16 @@ namespace ConsoleApp3
         {
             string[] arr = new string[0];
             string[][] readFile = new string[0][];
-            string pathUrl = @"C:\Users\ADMIN\Desktop\Readfile";
+            string pathUrl = @"C:\Users\ADMIN\Desktop\test";
             Spreadsheet document = new Spreadsheet();
             Worksheet Sheet = document.Workbook.Worksheets.Add("sheet1");
 
             Sheet.Cell("A1").Value = "Path";
             Sheet.Columns[0].Width = 250;
-            Sheet.Cell("B1").Value = "English";
+            Sheet.Cell("B1").Value = "Line";
             Sheet.Columns[1].Width = 250;
+            Sheet.Cell("C1").Value = "English";
+            Sheet.Columns[2].Width = 250;
 
             string[] tes = ReadAllFilesInDirectory(pathUrl, arr);
             Console.WriteLine(pathUrl.Length);
@@ -145,7 +147,8 @@ namespace ConsoleApp3
             {
 
                 Sheet.Cell(Convert.ToString("A" + rowIndex)).Value = readFile[i][0];
-                Sheet.Cell(Convert.ToString("B" + rowIndex)).Value = readFile[i][1];
+                Sheet.Cell(Convert.ToString("B" + rowIndex)).Value = readFile[i][2];
+                Sheet.Cell(Convert.ToString("C" + rowIndex)).Value = readFile[i][1];
                 rowIndex++;
             }
 
