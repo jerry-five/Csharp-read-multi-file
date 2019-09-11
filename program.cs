@@ -52,7 +52,7 @@ namespace ConsoleApp3
                 {
                     StringBuilder sb = new StringBuilder();
                     string[] lines = File.ReadAllLines(file);
-                    for(int i = 0; i < lines.Length; i++)
+                    for (int i = 0; i < lines.Length; i++)
                     {
                         string convert = GetPlainTextFromHtml(lines[i]).Trim();
                         //handle check line on string;
@@ -86,7 +86,7 @@ namespace ConsoleApp3
                                     && !checkAgain.Contains("|")
                                     )
                                 {
-                                    string[] fileExtention = { file.Remove(0, stringLength + 1), checkAgain,(i + 1).ToString() };
+                                    string[] fileExtention = { file.Remove(0, stringLength + 1), checkAgain, (i + 1).ToString() };
                                     termsList = termsList.Concat(new string[][] { fileExtention }).ToArray();
                                 }
 
@@ -137,6 +137,8 @@ namespace ConsoleApp3
             Sheet.Columns[1].Width = 250;
             Sheet.Cell("C1").Value = "English";
             Sheet.Columns[2].Width = 250;
+            Sheet.Cell("D1").Value = "pathRoot";
+            Sheet.Columns[3].Width = 250;
 
             string[] tes = ReadAllFilesInDirectory(pathUrl, arr);
             Console.WriteLine(pathUrl.Length);
@@ -149,6 +151,7 @@ namespace ConsoleApp3
                 Sheet.Cell(Convert.ToString("A" + rowIndex)).Value = readFile[i][0];
                 Sheet.Cell(Convert.ToString("B" + rowIndex)).Value = readFile[i][2];
                 Sheet.Cell(Convert.ToString("C" + rowIndex)).Value = readFile[i][1];
+                Sheet.Cell(Convert.ToString("D" + rowIndex)).Value = Convert.ToString(pathUrl +@"\"+ readFile[i][0]);
                 rowIndex++;
             }
 
