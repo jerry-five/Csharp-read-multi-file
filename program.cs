@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Diagnostics;
 using System.Linq;
-using System.Collections;
 using System.Text.RegularExpressions;
 using Bytescout.Spreadsheet;
 using System.Text;
@@ -75,10 +74,22 @@ namespace ConsoleApp3
                                 && !convert.Contains("/script")
                                 && !convert.Contains("'script'")
                                 && !convert.Contains("http")
+                                && !convert.Contains("({")
+                                && !convert.Contains("})")
+                                && !convert.Contains("':")
+                                && !convert.Contains("$(")
                                 )
                             {
-                                string[] fileExtention = { file.Remove(0, stringLength + 1), convert };
-                                termsList = termsList.Concat(new string[][] { fileExtention }).ToArray();
+                                string checkAgain = removeBrackets(convert);
+                                if (
+                                    !checkAgain.Contains(":")
+                                    && !checkAgain.Contains("|")
+                                    )
+                                {
+                                    string[] fileExtention = { file.Remove(0, stringLength + 1), checkAgain };
+                                    termsList = termsList.Concat(new string[][] { fileExtention }).ToArray();
+                                }
+
                             }
                         }
                     }
@@ -90,6 +101,27 @@ namespace ConsoleApp3
                 }
             }
             return termsList;
+        }
+
+        private static string removeBrackets(string text)
+        {
+            if (text.Length > 0)
+            {
+                string checkAgain;
+                int bracketOpen = text.IndexOf("{");
+                int brackClose = text.IndexOf("}");
+                if (bracketOpen == 0 || brackClose >= text.Length - 1)
+                {
+                    Console.WriteLine(text);
+                    checkAgain = text.Remove(bracketOpen, brackClose - bracketOpen + 1);
+                    if (checkAgain.IndexOf(("{")) > -1)
+                    {
+                        return removeBrackets(checkAgain);
+                    }
+                    return checkAgain;
+                }
+            }
+            return text;
         }
         static void Main(string[] args)
         {
