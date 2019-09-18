@@ -9,7 +9,7 @@ class Program
         Excel.Application excelApp = new Excel.Application();
         if (excelApp != null)
         {
-            Excel.Workbook excelWorkbook = excelApp.Workbooks.Open(@"C:\Users\ADMIN\Desktop\EXPORT\Export.xls", 0, true, 5, "", "", true, Excel.XlPlatform.xlWindows, "\t", false, false, 0, true, 1, 0);
+            Excel.Workbook excelWorkbook = excelApp.Workbooks.Open(@"C:\Users\ADMIN\Desktop\Chinese\chinse.xlsx", 0, true, 5, "", "", true, Excel.XlPlatform.xlWindows, "\t", false, false, 0, true, 1, 0);
             Excel.Worksheet excelWorksheet = (Excel.Worksheet)excelWorkbook.Sheets[1];
 
             Excel.Range excelRange = excelWorksheet.UsedRange;
@@ -21,15 +21,14 @@ class Program
                 if (i > 1)
                 {
                     Excel.Range line = (excelWorksheet.Cells[i, 2]);
-                    Excel.Range path = (excelWorksheet.Cells[i, 4]);
-                    Excel.Range newText = (excelWorksheet.Cells[i, 5]);
+                    Excel.Range path = (excelWorksheet.Cells[i, 5]);
+                    Excel.Range newText = (excelWorksheet.Cells[i, 4]);
                     Excel.Range englishText = (excelWorksheet.Cells[i, 3]);
                     int valueLine = Convert.ToInt32(line.Value);
                     string valuePath = path.Value.ToString();
                     string ValueText = newText.Value.ToString();
                     string textCompare = englishText.Value.ToString();
-                   lineChanger(ValueText, valuePath, valueLine, textCompare);
-//                    Console.WriteLine(valueLine + valuePath + ValueText + textCompare);
+                    lineChanger(ValueText, valuePath, valueLine, textCompare);
 
                 }
             }
@@ -41,13 +40,13 @@ class Program
     static void lineChanger(string newText, string fileName, int line_to_edit, string textCompare)
     {
         string[] arrLine = File.ReadAllLines(fileName);
-        Console.WriteLine("textCompare"+textCompare);
-        Console.WriteLine("arrLine[line_to_edit]"+ arrLine[line_to_edit -1]);
-        string upText = arrLine[line_to_edit -1].Replace(textCompare, newText);
-        Console.WriteLine("fileNam"+fileName);
-        Console.WriteLine("upText"+ upText);
+        //  Console.WriteLine("textCompare" + textCompare);
+        //  Console.WriteLine("arrLine[line_to_edit]" + arrLine[line_to_edit - 1]);
+        string upText = arrLine[line_to_edit - 1].Replace(textCompare, newText);
+        //   Console.WriteLine("fileNam" + fileName);
+        //    Console.WriteLine("upText" + upText);
         arrLine[line_to_edit - 1] = upText;
-        Console.WriteLine("arrLine[line_to_edit -1]" +arrLine[line_to_edit -1]);
+        //  Console.WriteLine("arrLine[line_to_edit -1]" + arrLine[line_to_edit - 1]);
         File.WriteAllLines(fileName, arrLine);
     }
     static void Main()
